@@ -1,2 +1,9 @@
-venv
+.DS_Store
+
+venv/
+
+.env
+.empty
+db.*
+public/
 
