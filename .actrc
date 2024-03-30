@@ -1,4 +1,4 @@
 --workflows ./.gitea/workflows
 --var-file .env
 --env-file .empty
---secrets-file .secrets
+--secret-file .secrets
