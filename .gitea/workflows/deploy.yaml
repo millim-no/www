@@ -30,11 +30,11 @@ jobs:
           SSH_KEY: ${{ secrets.REPO_DEPLOY_KEY }}
       - name: Create .env file
         run: |
-          cat <<EOF
+          cat > .env <<EOF
           DJANGO_DEBUG=$DJANGO_DEBUG
           SECRET_KEY=$SECRET_KEY
           ALLOWED_HOSTS=$ALLOWED_HOSTS
-          EOF >> .env
+          EOF
         env:
           DJANGO_DEBUG: ${{ vars.DJANGO_DEBUG }}
           SECRET_KEY: ${{ vars.SECRET_KEY }}
@@ -66,11 +66,21 @@ jobs:
         env:
           TARGET: ${{ vars.DEPLOY_HOST }}
         run: |
-          echo $TARGET > /tmp/target_path.txt
+          echo $TARGET > /tmp/target_host.txt
       - name: Deploy
+        env:
+          TARGET: ${{ vars.DEPLOY_PATH }}
+          RSYNC_FLAGS: ${{ vars.RSYNC_FLAGS }}
         run: |
           chmod -R 777 .
-          rsync -a -e "ssh -o \"StrictHostKeyChecking off\" -i /tmp/target.key" --exclude-from=exclude.txt ./ $(cat /tmp/target_path.txt)
+          rsync -a $RSYNC_FLAGS \
+            -e "ssh -o \"StrictHostKeyChecking off\" -i /tmp/target.key" \
+            --exclude-from=exclude.txt \
+            ./ $(cat /tmp/target_host.txt):$TARGET
       - name: Install dependencies on server
         run: |
-          docker exec web-2 bash "cd /srv/portfolio/www && bash scripts/setup.sh"
+          ssh -o "StrictHostKeyChecking off" -i /tmp/target.key $(cat /tmp/target_host.txt) \
+          docker exec -w /srv/portfolio/www web-2 bash scripts/setup.sh
+      - name: Clean up
+        run: |
+          rm -rf /tmp
