@@ -37,3 +37,16 @@ else
   echo $check_log
   exit 1
 fi
+
+echo "Kopierer statiske filer..."
+python manage.py collectstatic --no-input > $log_path &2> $log_path
+#python3 manage.py loaddata dummydata.json >> $log_path
+
+if [[ $? == 0 ]]
+then
+  rm $log_path
+  echo "Kopiert."
+else
+  echo $check_log
+  exit 1
+fi
