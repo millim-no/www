@@ -23,8 +23,9 @@ jobs:
           echo "" >> /tmp/deploy.key && \
           chmod 600 /tmp/deploy.key && \
           GIT_SSH_COMMAND="ssh -i /tmp/deploy.key -o StrictHostKeyChecking=no" \
-          git clone --recurse-submodules git@gitea.ts.millim.no:millim/www . && \
-          git checkout ${{ github.ref_name }}
+          git clone git@gitea.ts.millim.no:millim/www . && \
+          git checkout ${{ github.ref_name }} && \
+          git submodule update --init --recursive
         env:
           SSH_KEY: ${{ secrets.REPO_DEPLOY_KEY }}
       - name: Create .env file
